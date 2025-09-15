@@ -12,6 +12,9 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      build: { // Add build configuration
+        outDir: 'public', // Specify 'public' as the output directory
       }
     };
 });
