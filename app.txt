@@ -1,0 +1,242 @@
+import React, { useState } from 'react';
+import { Download, Copy, GitBranch, Github, Loader, Book, Star } from 'lucide-react';
+
+const App = () => {
+    const [repoUrl, setRepoUrl] = useState('');
+    const [branchName, setBranchName] = useState('main');
+    const [report, setReport] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [showAlert, setShowAlert] = useState(false);
+
+    const API_KEY = ""; // Placeholder for Gemini API Key
+
+    const getRepoDetails = async (owner, repo, branch) => {
+        const repoData = await fetch(`https://api.github.com/repos/${owner}/${repo}`).then(res => res.json());
+        if (repoData.message) throw new Error(repoData.message);
+
+        const commits = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits?sha=${branch}`).then(res => res.json());
+        if (commits.message) throw new Error(commits.message);
+
+        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
+        const geminiPayload = {
+            contents: [{
+                parts: [{ text: `Act as a highly analytical technical expert. Analyze a GitHub repository with the following description and recent commits, and provide a concise, single-paragraph summary of its purpose and key findings. Avoid generic phrases. If there are any issues with the request, please generate a simple "Error" message.
+                Repository Name: ${repoData.name}
+                Description: ${repoData.description || 'No description provided.'}
+                Latest Commits: ${commits.slice(0, 5).map(c => c.commit.message).join('; ')}
+                `}]
+            }],
+            tools: [{ "google_search": {} }],
+            systemInstruction: {
+                parts: [{ text: "You are a highly analytical technical expert. You will analyze GitHub repository data and provide a concise, single-paragraph summary of key findings, and project purpose." }]
+            },
+        };
+
+        const response = await fetch(geminiApiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(geminiPayload)
+        });
+
+        const result = await response.json();
+        let projectSummary = "Could not generate a summary.";
+        try {
+            projectSummary = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        } catch (e) {
+            console.error("Error parsing Gemini response:", e);
+        }
+
+        return { repoData, commits, projectSummary };
+    };
+
+    const handleGenerateReport = async () => {
+        if (!repoUrl) {
+            setAlertMessage("Please enter a GitHub repository URL.");
+            setShowAlert(true);
+            return;
+        }
+
+        setReport(null);
+        setLoading(true);
+        setShowAlert(false);
+
+        try {
+            const parts = repoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+            if (!parts || parts.length < 3) {
+                throw new Error("Invalid GitHub repository URL.");
+            }
+            const owner = parts[1];
+            const repo = parts[2].replace(/\.git$/, '');
+
+            const { repoData, commits, projectSummary } = await getRepoDetails(owner, repo, branchName);
+
+            const reportDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            const commitTimeline = commits.slice(0, 5).map((commit) => ({
+                id: commit.sha,
+                message: commit.commit.message,
+                author: commit.commit.author.name,
+                date: new Date(commit.commit.author.date).toLocaleString(),
+                sha: commit.sha.substring(0, 7)
+            }));
+
+            setReport({ repoData, projectSummary, commitTimeline, reportDate });
+
+        } catch (error) {
+            console.error("Error generating report:", error);
+            setAlertMessage(`Error generating report: ${error.message}. Please check the URL and try again.`);
+            setShowAlert(true);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDownload = () => {
+        if (!report) return;
+        const reportContent = document.getElementById('report-container').innerHTML;
+        const blob = new Blob([reportContent], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${report.repoData.name}_report.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
+    const handleCopy = () => {
+        if (!report) return;
+        const reportContent = document.getElementById('report-container').innerText;
+        const tempTextarea = document.createElement('textarea');
+        tempTextarea.value = reportContent;
+        document.body.appendChild(tempTextarea);
+        tempTextarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempTextarea);
+        setAlertMessage("Report copied to clipboard!");
+        setShowAlert(true);
+    };
+
+    const AlertModal = () => (
+        <div className={`fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center ${showAlert ? 'flex' : 'hidden'}`}>
+            <div className="bg-slate-800 p-6 rounded-lg max-w-lg w-full text-white relative">
+                <span className="absolute top-2 right-4 text-2xl cursor-pointer" onClick={() => setShowAlert(false)}>&times;</span>
+                <p id="alertMessage">{alertMessage}</p>
+            </div>
+        </div>
+    );
+
+    return (
+        <div className="bg-[#0d1117] min-h-screen text-[#c9d1d9] font-inter p-5 sm:p-10 antialiased">
+            <div className="max-w-4xl mx-auto">
+                <h1 className="text-4xl sm:text-5xl font-bold text-center mb-10 text-white animate-fade-in">GitHub Report Generator</h1>
+                <div className="bg-[#161b22] p-8 rounded-xl border border-[#30363d] shadow-2xl transition-all duration-300 hover:shadow-cyan-500/20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label htmlFor="repoUrl" className="block text-sm font-semibold mb-2 text-[#8b949e]">GitHub Repository URL</label>
+                            <div className="relative">
+                                <Github className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949e]" size={20} />
+                                <input
+                                    type="text"
+                                    id="repoUrl"
+                                    className="w-full pl-10 pr-4 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#c9d1d9] focus:outline-none focus:ring-2 focus:ring-[#58a6ff] transition-colors duration-200"
+                                    placeholder="e.g., https://github.com/RoyGHodgeJr/ProjectFlow"
+                                    value={repoUrl}
+                                    onChange={(e) => setRepoUrl(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label htmlFor="branchName" className="block text-sm font-semibold mb-2 text-[#8b949e]">Branch (optional)</label>
+                            <div className="relative">
+                                <GitBranch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949e]" size={20} />
+                                <input
+                                    type="text"
+                                    id="branchName"
+                                    className="w-full pl-10 pr-4 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#c9d1d9] focus:outline-none focus:ring-2 focus:ring-[#58a6ff] transition-colors duration-200"
+                                    placeholder="e.g., main"
+                                    value={branchName}
+                                    onChange={(e) => setBranchName(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex justify-center">
+                        <button
+                            onClick={handleGenerateReport}
+                            className="bg-[#58a6ff] text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-[#4a90e2] transition-all duration-300 transform hover:scale-105"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <span className="flex items-center">
+                                    <Loader className="animate-spin mr-2" size={20} /> Generating Report...
+                                </span>
+                            ) : (
+                                "Generate Report"
+                            )}
+                        </button>
+                    </div>
+                </div>
+
+                {report && (
+                    <div className="mt-10 animate-fade-in-up">
+                        <div id="report-container" className="bg-[#161b22] p-8 rounded-xl border border-[#30363d] shadow-2xl">
+                            <h1 className="text-4xl font-bold mb-4 text-[#58a6ff]">{report.repoData.name} Report</h1>
+                            <p className="text-sm mb-6 text-[#8b949e]">Report generated for {report.repoData.full_name} on {report.reportDate}</p>
+
+                            <hr className="border-[#30363d] my-6" />
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="p-6 rounded-lg bg-[#0d1117] border border-[#30363d] transition-transform duration-300 hover:scale-[1.02]">
+                                    <h2 className="text-2xl font-semibold mb-3 text-white flex items-center"><Book size={24} className="mr-2 text-[#58a6ff]" /> Project Summary</h2>
+                                    <p className="text-[#c9d1d9]">{report.projectSummary}</p>
+                                </div>
+                                <div className="p-6 rounded-lg bg-[#0d1117] border border-[#30363d] transition-transform duration-300 hover:scale-[1.02]">
+                                    <h2 className="text-2xl font-semibold mb-3 text-white flex items-center"><Star size={24} className="mr-2 text-[#f0b429]" /> Key Stats</h2>
+                                    <ul className="text-[#c9d1d9] space-y-2">
+                                        <li><strong>Stars:</strong> {report.repoData.stargazers_count}</li>
+                                        <li><strong>Forks:</strong> {report.repoData.forks_count}</li>
+                                        <li><strong>Open Issues:</strong> {report.repoData.open_issues_count}</li>
+                                        <li><strong>Created:</strong> {new Date(report.repoData.created_at).toLocaleDateString()}</li>
+                                        <li><strong>Last Updated:</strong> {new Date(report.repoData.pushed_at).toLocaleDateString()}</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <hr className="border-[#30363d] my-6" />
+
+                            <h2 className="text-2xl font-semibold mb-6 text-white text-center">Recent Activity</h2>
+                            <div className="relative">
+                                <div className="absolute left-6 h-full w-1 bg-[#30363d] rounded-full"></div>
+                                <div className="timeline">
+                                    {report.commitTimeline.map((commit, index) => (
+                                        <div key={commit.id} className="relative mb-8">
+                                            <div className="absolute left-3 w-6 h-6 rounded-full bg-[#58a6ff] flex items-center justify-center z-10">
+                                                <GitBranch size={16} className="text-white" />
+                                            </div>
+                                            <div className="ml-12 p-4 bg-[#0d1117] rounded-lg border border-[#30363d] shadow-lg transition-transform duration-300 hover:scale-[1.02]">
+                                                <h3 className="text-lg font-semibold text-white">{commit.message}</h3>
+                                                <p className="text-sm text-[#8b949e] my-1">by {commit.author} on {commit.date}</p>
+                                                <code className="text-xs text-[#58a6ff]">{commit.sha}</code>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex justify-center mt-6 space-x-4">
+                            <button onClick={handleDownload} className="button bg-[#2da44e] hover:bg-[#258b41] flex items-center">
+                                <Download size={20} className="mr-2" /> Download as HTML
+                            </button>
+                            <button onClick={handleCopy} className="button bg-[#58a6ff] hover:bg-[#4a90e2] flex items-center">
+                                <Copy size={20} className="mr-2" /> Copy to Clipboard
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+            <AlertModal />
+        </div>
+    );
+};
+
+export default App;
