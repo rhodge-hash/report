@@ -1,165 +1,183 @@
-# Tasks for Web Application for Daily Task Management and GitHub Activity Tracking
+# Tasks: 001-lets-create-an
 
-**Feature Branch**: `001-lets-create-an`
-**Feature Spec**: `/home/roy/Desktop/gh-report-gem/specs/001-lets-create-an/spec.md`
-**Implementation Plan**: `/home/roy/Desktop/gh-report-gem/specs/001-lets-create-an/plan.md`
+**Input**: Design documents from `/specs/001-lets-create-an/`
+**Prerequisites**: plan.md (required), research.md, data-model.md, contracts/
 
-## Context
-This document outlines the actionable, dependency-ordered tasks for implementing the "Web Application for Daily Task Management and GitHub Activity Tracking" feature. The application will be a full-stack Next.js (React/Node.js) application with TypeScript, styled using Bootstrap and Material Design principles. Unit and End-to-End tests will be written for all features, and the app will be verified to pass all tests before deployment. Changelog and documentation will be updated when tests are passing.
-
-## Task List
-
-### Setup Tasks
-
-*   **T001** [P]: Initialize Next.js project with TypeScript, Bootstrap, and Material Design.
-    *   **Description**: Set up the basic Next.js project structure, configure TypeScript, and integrate Bootstrap and Material Design for styling.
-    *   **Files**: `package.json`, `tsconfig.json`, `next.config.js`, `styles/globals.css`
-    *   **Agent Command**: `run_shell_command('npx create-next-app@latest --ts --tailwind --eslint .', description='Initialize Next.js project')` (Note: Tailwind is often used with Next.js, but Bootstrap/Material Design was specified. This command needs adjustment or manual setup.)
-*   **T002**: Configure linting and formatting for TypeScript.
-    *   **Description**: Set up ESLint and Prettier for consistent code style.
-    *   **Files**: `.eslintrc.json`, `.prettierrc.json`
-*   **T003**: Install and configure necessary dependencies (e.g., for API calls, state management).
-    *   **Description**: Add libraries for data fetching (e.g., `axios`, `swr`), state management (e.g., `zustand`, `redux`), and any other core utilities.
-    *   **Files**: `package.json`
-
-### Research & Decision Tasks (from research.md)
-
-*   **T004**: Research and decide on the storage solution for user tasks, GitHub repository configurations, and cached GitHub activity data.
-    *   **Description**: Investigate PostgreSQL, MongoDB, SQLite, Firebase, AWS DynamoDB, etc., and make a decision based on project needs.
-    *   **Output**: Update `plan.md` with the chosen storage solution.
-*   **T005**: Research and decide on testing frameworks and strategies for unit, integration, and end-to-end testing.
-    *   **Description**: Evaluate Jest, React Testing Library, Cypress, Playwright, Supertest, etc., and make a decision.
-    *   **Output**: Update `plan.md` with the chosen testing frameworks.
-*   **T006**: Research and decide on the GitHub authentication method (OAuth 2.0, Personal Access Tokens, GitHub Apps).
-    *   **Description**: Determine the most secure and user-friendly method for the web application.
-    *   **Output**: Update `plan.md` and `api-contracts.md` with the chosen authentication method details.
-*   **T007**: Research and decide on specific GitHub activities to track (commits, pull requests, issues, etc.).
-    *   **Description**: Prioritize activities that directly reflect developer productivity and collaboration.
-    *   **Output**: Update `data-model.md` and `api-contracts.md` with the chosen activities.
-
-### Model Creation Tasks (from data-model.md)
-
-*   **T008** [P]: Create `User` model/schema.
-    *   **Description**: Define the data structure for the `User` entity, including `id`, `username`, `email`, `githubAuthToken`, `workSchedule`, and `configuredRepositories`.
-    *   **Files**: `backend/src/models/User.ts`
-*   **T009** [P]: Create `Task` model/schema.
-    *   **Description**: Define the data structure for the `Task` entity, including `id`, `userId`, `description`, `status`, `dueDate`, `createdAt`, and `completedAt`.
-    *   **Files**: `backend/src/models/Task.ts`
-*   **T010** [P]: Create `GitHubRepository` model/schema.
-    *   **Description**: Define the data structure for the `GitHubRepository` entity, including `id`, `userId`, `owner`, and `repoName`.
-    *   **Files**: `backend/src/models/GitHubRepository.ts`
-*   **T011** [P]: Create `GitHubActivity` model/schema.
-    *   **Description**: Define the data structure for the `GitHubActivity` entity, including `id`, `repositoryId`, `type`, `timestamp`, and `details`.
-    *   **Files**: `backend/src/models/GitHubActivity.ts`
-*   **T012** [P]: Create `WorkSchedule` model/schema.
-    *   **Description**: Define the data structure for the `WorkSchedule` entity, including `id`, `userId`, `startTime`, `endTime`, and `workingDays`.
-    *   **Files**: `backend/src/models/WorkSchedule.ts`
-
-### Backend API Development Tasks (from api-contracts.md)
-
-*   **T013**: Implement `POST /api/tasks` endpoint (Create Task).
-    *   **Description**: Create the API endpoint to allow users to create new tasks.
-    *   **Files**: `backend/src/api/tasks.ts`
-*   **T014**: Implement `PUT /api/tasks/{taskId}/complete` endpoint (Mark Task Complete).
-    *   **Description**: Create the API endpoint to allow users to mark tasks as complete.
-    *   **Files**: `backend/src/api/tasks.ts`
-*   **T015**: Implement `POST /api/github/repositories` endpoint (Configure GitHub Repositories).
-    *   **Description**: Create the API endpoint to allow users to add or update GitHub repositories to track.
-    *   **Files**: `backend/src/api/github.ts`
-*   **T016**: Implement `GET /api/github/activity` endpoint (Fetch GitHub Activity).
-    *   **Description**: Create the API endpoint to retrieve filtered GitHub activity for configured repositories within the user's work schedule.
-    *   **Files**: `backend/src/api/github.ts`
-*   **T017**: Implement `POST /api/github/auth/oauth` endpoint (GitHub OAuth Authentication).
-    *   **Description**: Implement the GitHub OAuth authentication flow.
-    *   **Files**: `backend/src/api/auth.ts`
-*   **T018**: Implement `GET /api/dashboard` endpoint (Get Dashboard Data).
-    *   **Description**: Create the API endpoint to provide a consolidated view of daily tasks and filtered GitHub activity.
-    *   **Files**: `backend/src/api/dashboard.ts`
-*   **T019**: Implement `PUT /api/users/me/work-schedule` endpoint (Update Work Schedule).
-    *   **Description**: Create the API endpoint to allow users to configure their work schedule.
-    *   **Files**: `backend/src/api/users.ts`
-
-### Frontend Development Tasks
-
-*   **T020**: Design and implement the main dashboard UI.
-    *   **Description**: Create the React components for displaying daily tasks and GitHub activity.
-    *   **Files**: `frontend/src/pages/dashboard.tsx`, `frontend/src/components/Dashboard.tsx`
-*   **T021**: Implement task management UI (create, mark complete).
-    *   **Description**: Create React components for adding new tasks and marking existing ones as complete.
-    *   **Files**: `frontend/src/components/TaskForm.tsx`, `frontend/src/components/TaskList.tsx`
-*   **T022**: Implement GitHub repository configuration UI.
-    *   **Description**: Create React components for users to add and manage their GitHub repositories.
-    *   **Files**: `frontend/src/pages/settings.tsx`, `frontend/src/components/GitHubRepoConfig.tsx`
-*   **T023**: Implement work schedule configuration UI.
-    *   **Description**: Create React components for users to set their work start time, end time, and working days.
-    *   **Files**: `frontend/src/pages/settings.tsx`, `frontend/src/components/WorkScheduleConfig.tsx`
-*   **T024**: Implement GitHub OAuth login flow on the frontend.
-    *   **Description**: Integrate the GitHub OAuth process into the frontend application.
-    *   **Files**: `frontend/src/pages/login.tsx`, `frontend/src/services/auth.ts`
-
-### Testing Tasks (Unit & End-to-End)
-
-*   **T025** [P]: Write unit tests for all backend models.
-    *   **Description**: Ensure each model/schema behaves as expected.
-    *   **Files**: `backend/tests/unit/models/*.test.ts`
-*   **T026** [P]: Write unit tests for all backend API utility functions/services.
-    *   **Description**: Test individual functions that support the API endpoints.
-    *   **Files**: `backend/tests/unit/services/*.test.ts`
-*   **T027** [P]: Write contract tests for all API endpoints.
-    *   **Description**: Verify that API requests and responses adhere to the defined contracts in `api-contracts.md`.
-    *   **Files**: `backend/tests/contract/*.test.ts`
-*   **T028** [P]: Write integration tests for Scenario 1: Viewing Daily Tasks and Filtered GitHub Activity.
-    *   **Description**: Test the end-to-end flow of logging in, configuring repos/schedule, and viewing the dashboard.
-    *   **Files**: `tests/integration/dashboard.test.ts`
-*   **T029** [P]: Write integration tests for Scenario 2: Marking a Task as Complete.
-    *   **Description**: Test the end-to-end flow of creating a task and marking it as complete.
-    *   **Files**: `tests/integration/task-management.test.ts`
-*   **T030** [P]: Write unit tests for all frontend React components.
-    *   **Description**: Test individual React components in isolation.
-    *   **Files**: `frontend/tests/unit/components/*.test.tsx`
-*   **T031** [P]: Write end-to-end tests for critical user flows.
-    *   **Description**: Use a tool like Cypress or Playwright to simulate user interactions and verify the entire application flow.
-    *   **Files**: `tests/e2e/*.test.ts`
-
-### Integration & Polish Tasks
-
-*   **T032**: Implement database connection and migrations.
-    *   **Description**: Set up the chosen database and create initial migration scripts for the defined models.
-    *   **Files**: `backend/src/config/database.ts`, `backend/src/migrations/*.ts`
-*   **T033**: Implement GitHub API client and data fetching logic.
-    *   **Description**: Create a service to interact with the GitHub API, handling authentication and data retrieval.
-    *   **Files**: `backend/src/services/github.ts`
-*   **T034**: Implement error handling and logging across the application.
-    *   **Description**: Ensure robust error handling for API calls, database operations, and UI interactions, with appropriate logging.
-    *   **Files**: `backend/src/utils/errorHandler.ts`, `frontend/src/utils/logger.ts`
-*   **T035**: Implement user authentication and session management.
-    *   **Description**: Secure user login, session handling, and authorization for API endpoints.
-    *   **Files**: `backend/src/middleware/auth.ts`, `frontend/src/services/auth.ts`
-*   **T036**: Update changelog and documentation.
-    *   **Description**: Document the new feature, API endpoints, and any significant changes.
-    *   **Files**: `CHANGELOG.md`, `README.md`, `docs/*.md`
-*   **T037**: Verify app is passing all tests.
-    *   **Description**: Run all unit, integration, and end-to-end tests to ensure full test coverage and functionality.
-    *   **Agent Command**: `run_shell_command('npm test', description='Run all tests')`
-
-## Parallel Execution Guidance
-
-Tasks marked with `[P]` can be executed in parallel as they are largely independent. For example:
-
-```bash
-# Example of parallel execution for model creation
-run_shell_command('create_model User', description='Create User model') &
-run_shell_command('create_model Task', description='Create Task model') &
-run_shell_command('create_model GitHubRepository', description='Create GitHubRepository model') &
-run_shell_command('create_model GitHubActivity', description='Create GitHubActivity model') &
-run_shell_command('create_model WorkSchedule', description='Create WorkSchedule model')
+## Execution Flow (main)
+```
+1. Load plan.md from feature directory
+   → If not found: ERROR "No implementation plan found"
+   → Extract: tech stack, libraries, structure
+2. Load optional design documents:
+   → data-model.md: Extract entities → model tasks
+   → contracts/: Each file → contract test task
+   → research.md: Extract decisions → setup tasks
+3. Generate tasks by category:
+   → Setup: project init, dependencies, linting
+   → Tests: contract tests, integration tests
+   → Core: models, services, CLI commands
+   → Integration: DB, middleware, logging
+   → Polish: unit tests, performance, docs
+4. Apply task rules:
+   → Different files = mark [P] for parallel
+   → Same file = sequential (no [P])
+   → Tests before implementation (TDD)
+5. Number tasks sequentially (T001, T002...)
+6. Generate dependency graph
+7. Create parallel execution examples
+8. Validate task completeness:
+   → All contracts have tests?
+   → All entities have models?
+   → All endpoints implemented?
+9. Return: SUCCESS (tasks ready for execution)
 ```
 
-## Dependency Notes
+## Format: `[ID] [P?] Description`
+- **[P]**: Can run in parallel (different files, no dependencies)
+- Include exact file paths in descriptions
 
-*   Setup tasks must be completed before any other development.
-*   Research and Decision tasks should ideally be completed before starting model or API development, as they inform key architectural choices.
-*   Model creation tasks are prerequisites for backend API development.
-*   Backend API development tasks are prerequisites for frontend development tasks that consume those APIs.
-*   Testing tasks should be performed concurrently with development (TDD approach), with contract and integration tests preceding unit tests for implementation.
-*   Integration and Polish tasks are generally performed towards the end of the development cycle.
+## Path Conventions
+- **Single project**: `src/`, `tests/` at repository root
+- **Web app**: `backend/src/`, `frontend/src/`
+- **Mobile**: `api/src/`, `ios/src/` or `android/src//
+- Paths shown below assume single project - adjust based on plan.md structure
+
+## Phase 3.1: Setup
+- [ ] T001 Initialize Next.js project in `frontend/` with TypeScript, Bootstrap, and Material Design principles. (Already partially done, but need to ensure all are configured).
+- [ ] T002 Configure ESLint and Prettier for `frontend/` and `backend/` (if applicable) for consistent code style.
+- [ ] T003 Set up basic Vercel deployment configuration (`vercel.json` if needed, or ensure `next.config.js` is ready).
+- [ ] T004 Create GitHub Actions workflow for CI/CD (lint, test, build, deploy to Vercel on `dev` branch push).
+
+## Phase 3.2: Tests First (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
+**CRITICAL: These tests MUST be written and MUST FAIL before ANY implementation**
+- [ ] T005 [P] Contract test `POST /api/tasks` in `tests/contract/frontend/api/tasks.test.ts`.
+- [ ] T006 [P] Contract test `PUT /api/tasks/{taskId}/complete` in `tests/contract/frontend/api/tasks.test.ts`.
+- [ ] T007 [P] Contract test `POST /api/github/repositories` in `tests/contract/frontend/api/github.test.ts`.
+- [ ] T008 [P] Contract test `GET /api/github/activity` in `tests/contract/frontend/api/github.test.ts`.
+- [ ] T009 [P] Contract test `POST /api/github/auth/oauth` in `tests/contract/frontend/api/github.test.ts`. (Note: This endpoint needs clarification, so the test will be based on current understanding).
+- [ ] T010 [P] Contract test `GET /api/dashboard` in `tests/contract/frontend/api/dashboard.test.ts`.
+- [ ] T011 [P] Contract test `PUT /api/users/me/work-schedule` in `tests/contract/frontend/api/users.test.ts`.
+- [ ] T012 [P] Integration test "Viewing Daily Tasks and Filtered GitHub Activity" in `tests/integration/frontend/dashboard.test.ts`.
+- [ ] T013 [P] Integration test "Marking a Task as Complete" in `tests/integration/frontend/tasks.test.ts`.
+
+## Phase 3.3: Core Implementation (ONLY after tests are failing)
+- [ ] T014 [P] Implement `User` model in `backend/src/models/User.ts`.
+- [ ] T015 [P] Implement `Task` model in `backend/src/models/Task.ts`.
+- [ ] T016 [P] Implement `GitHubRepository` model in `backend/src/models/GitHubRepository.ts`.
+- [ ] T017 [P] Implement `GitHubActivity` model in `backend/src/models/GitHubActivity.ts`.
+- [ ] T018 [P] Implement `WorkSchedule` model in `backend/src/models/WorkSchedule.ts`.
+- [ ] T019 Implement `POST /api/tasks` endpoint in `frontend/src/app/api/tasks/route.ts`.
+- [ ] T020 Implement `PUT /api/tasks/{taskId}/complete` endpoint in `frontend/src/app/api/tasks/[taskId]/complete/route.ts`.
+- [ ] T021 Implement `POST /api/github/repositories` endpoint in `frontend/src/app/api/github/repositories/route.ts`.
+- [ ] T022 Implement `GET /api/github/activity` endpoint in `frontend/src/app/api/github/activity/route.ts`.
+- [ ] T023 Implement `POST /api/github/auth/oauth` endpoint in `frontend/src/app/api/github/auth/oauth/route.ts`.
+- [ ] T024 Implement `GET /api/dashboard` endpoint in `frontend/src/app/api/dashboard/route.ts`.
+- [ ] T025 Implement `PUT /api/users/me/work-schedule` endpoint in `frontend/src/app/api/users/me/work-schedule/route.ts`.
+- [ ] T026 [P] Implement basic UI for task management in `frontend/src/components/TaskManagement.tsx`.
+- [ ] T027 [P] Implement basic UI for GitHub activity display in `frontend/src/components/GitHubActivityDisplay.tsx`.
+- [ ] T028 [P] Implement basic UI for repository configuration in `frontend/src/components/RepositoryConfiguration.tsx`.
+- [ ] T029 [P] Implement basic UI for work schedule configuration in `frontend/src/components/WorkScheduleConfiguration.tsx`.
+- [ ] T030 Integrate UI components into `frontend/app/page.tsx`.
+
+## Phase 3.4: Integration
+- [ ] T031 Implement secure handling of GitHub Personal Access Token (environment variables, encryption).
+- [ ] T032 Integrate GitHub API calls for activity fetching.
+- [ ] T033 Implement local storage for task management persistence.
+- [ ] T034 Implement data filtering logic for GitHub activity based on work schedule.
+
+## Phase 3.5: Polish
+- [ ] T035 [P] Unit tests for models in `tests/unit/backend/models/`.
+- [ ] T036 [P] Unit tests for UI components in `tests/unit/frontend/components/`.
+- [ ] T037 Performance optimization for API endpoints and UI rendering.
+- [ ] T038 Update `README.md` with setup, configuration, and deployment instructions.
+- [ ] T039 Run `npm run lint` and fix all reported issues.
+- [ ] T040 Ensure all CI/CD steps pass on GitHub Actions.
+
+## Dependencies
+- Tasks T005-T013 (Tests) must be completed and fail before T014-T030 (Core Implementation).
+- Tasks T014-T018 (Models) block T019-T025 (API Endpoints) and T031-T034 (Integration).
+- Tasks T026-T029 (UI Components) block T030 (UI Integration).
+- Tasks T031-T034 (Integration) block T037 (Performance Optimization).
+- All implementation tasks (T014-T034) must be completed before T035-T040 (Polish).
+
+## Parallel Example
+```bash
+# Phase 3.2: Tests First (TDD)
+# These tasks can be run in parallel as they create separate test files.
+# Each test should be written to fail initially.
+
+# In separate terminal sessions or as parallel steps in a CI/CD pipeline:
+# Task: "Contract test POST /api/tasks in tests/contract/frontend/api/tasks.test.ts"
+# Task: "Contract test PUT /api/tasks/{taskId}/complete in tests/contract/frontend/api/tasks.test.ts"
+# Task: "Contract test POST /api/github/repositories in tests/contract/frontend/api/github.test.ts"
+# Task: "Contract test GET /api/github/activity in tests/contract/frontend/api/github.test.ts"
+# Task: "Contract test POST /api/github/auth/oauth in tests/contract/frontend/api/github.test.ts"
+# Task: "Contract test GET /api/dashboard in tests/contract/frontend/api/dashboard.test.ts"
+# Task: "Contract test PUT /api/users/me/work-schedule in tests/contract/frontend/api/users.test.ts"
+# Task: "Integration test \"Viewing Daily Tasks and Filtered GitHub Activity\" in tests/integration/frontend/dashboard.test.ts"
+# Task: "Integration test \"Marking a Task as Complete\" in tests/integration/frontend/tasks.test.ts"
+
+# Example of running a single test:
+# npm test -- tests/contract/frontend/api/tasks.test.ts
+
+# Phase 3.3: Core Implementation - Models
+# These tasks can be run in parallel as they create separate model files.
+
+# In separate terminal sessions or as parallel steps:
+# Task: "Implement `User` model in backend/src/models/User.ts"
+# Task: "Implement `Task` model in backend/src/models/Task.ts"
+# Task: "Implement `GitHubRepository` model in backend/src/models/GitHubRepository.ts"
+# Task: "Implement `GitHubActivity` model in backend/src/models/GitHubActivity.ts"
+# Task: "Implement `WorkSchedule` model in backend/src/models/WorkSchedule.ts"
+
+# Phase 3.3: Core Implementation - UI Components
+# These tasks can be run in parallel as they create separate UI component files.
+
+# In separate terminal sessions or as parallel steps:
+# Task: "Implement basic UI for task management in frontend/src/components/TaskManagement.tsx"
+# Task: "Implement basic UI for GitHub activity display in frontend/src/components/GitHubActivityDisplay.tsx"
+# Task: "Implement basic UI for repository configuration in frontend/src/components/RepositoryConfiguration.tsx"
+# Task: "Implement basic UI for work schedule configuration in frontend/src/components/WorkScheduleConfiguration.tsx"
+
+# Phase 3.5: Polish - Unit Tests
+# These tasks can be run in parallel as they create separate unit test files.
+
+# In separate terminal sessions or as parallel steps:
+# Task: "Unit tests for models in tests/unit/backend/models/"
+# Task: "Unit tests for UI components in tests/unit/frontend/components/"
+```
+
+## Notes
+- [P] tasks = different files, no dependencies
+- Verify tests fail before implementing
+- Commit after each task
+- Avoid: vague tasks, same file conflicts
+
+## Task Generation Rules
+*Applied during main() execution*
+
+1. **From Contracts**:
+   - Each contract file → contract test task [P]
+   - Each endpoint → implementation task
+   
+2. **From Data Model**:
+   - Each entity → model creation task [P]
+   - Relationships → service layer tasks
+   
+3. **From User Stories**:
+   - Each story → integration test [P]
+   - Quickstart scenarios → validation tasks
+
+4. **Ordering**:
+   - Setup → Tests → Models → Services → Endpoints → Polish
+   - Dependencies block parallel execution
+
+## Validation Checklist
+*GATE: Checked by main() before returning*
+
+- [ ] All contracts have corresponding tests
+- [ ] All entities have model tasks
+- [ ] All tests come before implementation
+- [ ] Parallel tasks truly independent
+- [ ] Each task specifies exact file path
+- [ ] No task modifies same file as another [P] task
