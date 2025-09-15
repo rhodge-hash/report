@@ -4,7 +4,9 @@
   "description": "Monorepo for gh-report-gem project",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run build --workspace=frontend",
+    "lint": "npm run lint --workspace=frontend",
+    "test": "npm test --workspace=frontend"
   },
   "keywords": [],
   "author": "",

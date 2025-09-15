@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { type Project, type Task, TaskStatus } from './types';
 import useLocalStorage from './hooks/useLocalStorage';
 import ProjectSelector from './components/ProjectSelector';
