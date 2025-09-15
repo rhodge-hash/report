@@ -43,7 +43,7 @@
 - Paths shown below assume single project - adjust based on plan.md structure
 
 ## Phase 3.1: Setup
-- [ ] T001 Initialize Next.js project in `frontend/` with TypeScript, Bootstrap, and Material Design principles. (Already partially done, but need to ensure all are configured).
+- [ ] T001 Initialize Next.js project in `frontend/` with TypeScript, Bootstrap, and Material Design principles. (This task will now involve verifying the `pf-main` setup).
 - [ ] T002 Configure ESLint and Prettier for `frontend/` and `backend/` (if applicable) for consistent code style.
 - [ ] T003 Set up basic Vercel deployment configuration (`vercel.json` if needed, or ensure `next.config.js` is ready).
 - [ ] T004 Create GitHub Actions workflow for CI/CD (lint, test, build, deploy to Vercel on `dev` branch push).

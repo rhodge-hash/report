@@ -1,24 +1,31 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
+  "name": "projectflow",
   "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "npx eslint . --ignore-pattern \"dist/\"",
+    "test": "echo \"No tests found. Please add test files.\" && exit 0"
   },
   "dependencies": {
-    "next": "^14.2.32",
-    "react": "^18",
-    "react-dom": "^18"
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "@google/genai": "^1.19.0"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "eslint": "^8",
-    "eslint-config-next": "14.0.4",
-    "typescript": "^5"
+    "@types/node": "^22.14.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0",
+    "eslint": "^8.57.0",
+    "vitest": "^1.6.0",
+    "globals": "^15.6.0",
+    "@eslint/js": "^8.57.0",
+    "eslint-plugin-react": "^7.34.3",
+    "@eslint/compat": "^1.1.0",
+    "typescript-eslint": "^7.13.1",
+    "eslint-plugin-react-hooks": "^4.6.0"
   }
 }
